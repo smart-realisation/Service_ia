@@ -1,6 +1,8 @@
 services:
   api:
-    build: .
+    # Remplace par ton image Docker Hub
+    image: ton-username/safelink-ai:latest
+    # build: .  # Décommente si tu veux builder localement
     ports:
       - "8000:8000"
     environment:
