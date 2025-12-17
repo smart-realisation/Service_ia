@@ -16,6 +16,7 @@ from .llm_service import LLMService
 from .device_service import DeviceService
 from .alert_service import AlertService
 from .sensor_service import SensorService
+from .mesure_service import MesureService
 from .prompt_builder import PromptBuilder
 
 logger = logging.getLogger(__name__)
@@ -78,6 +79,33 @@ class ChatbotService:
     ) -> Dict[str, Any]:
         """Execute a function and return results"""
         handlers = {
+            # Fonctions mesures (nouveau schéma BD)
+            "get_mesures": lambda: MesureService.get_mesures(
+                arguments.get("type_code"),
+                arguments.get("period", "24h"),
+                arguments.get("limit", 100)
+            ),
+            "get_latest_mesures": lambda: MesureService.get_latest_mesures(),
+            "get_mesures_stats": lambda: MesureService.get_stats(
+                arguments.get("period", "24h")
+            ),
+            "check_mesures_alerts": lambda: MesureService.check_alerts(),
+            "get_temperature": lambda: MesureService.get_mesures(
+                "TEMPERATURE",
+                arguments.get("period", "24h"),
+                arguments.get("limit", 50)
+            ),
+            "get_humidity": lambda: MesureService.get_mesures(
+                "HUMIDITE",
+                arguments.get("period", "24h"),
+                arguments.get("limit", 50)
+            ),
+            "get_gas_level": lambda: MesureService.get_mesures(
+                "GAZ",
+                arguments.get("period", "24h"),
+                arguments.get("limit", 50)
+            ),
+            # Anciennes fonctions (compatibilité)
             "get_connected_devices": lambda: DeviceService.get_connected_devices(
                 arguments.get("status", "all"),
                 arguments.get("zone")

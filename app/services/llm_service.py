@@ -18,22 +18,35 @@ FUNCTIONS_PROMPT = """
 Pour exécuter une fonction, réponds UNIQUEMENT avec le format JSON suivant (sans autre texte):
 {"function": "nom_fonction", "arguments": {...}}
 
-FONCTIONS:
-1. get_connected_devices(status="all"|"online"|"offline"|"suspicious", zone=null) - Liste les appareils connectés
-2. get_device_details(device_id) - Détails d'un appareil spécifique
-3. get_network_traffic(device_id=null, period="24h") - Analyse du trafic réseau
-4. get_new_devices(since="24h") - Nouveaux appareils détectés
-5. get_security_alerts(severity="all"|"critical"|"warning"|"info", status="active", limit=20) - Alertes de sécurité
-6. get_anomalies(type="all"|"network"|"physical"|"environmental", period="24h") - Anomalies détectées
-7. explain_alert(alert_id) - Explication d'une alerte
-8. get_sensor_data(sensor_type="all"|"temperature"|"humidity"|"gas"|"motion"|"light", node_id=null, period="24h") - Données capteurs
-9. get_node_status(node_id=null) - Statut des nœuds ESP32
-10. get_environmental_alerts(severity="all") - Alertes environnementales
-11. get_system_health() - État de santé du système
-12. get_security_report(period="24h", format="summary") - Rapport de sécurité
-13. get_compliance_status() - Conformité RGPD
-14. get_security_tips(topic="general"|"iot"|"network"|"physical"|"passwords") - Conseils de sécurité
-15. navigate_to(page) - Navigation vers une page (dashboard, devices, alerts, sensors, nodes, settings, reports)
+📊 FONCTIONS MESURES (CAPTEURS):
+1. get_mesures(type_code="TEMPERATURE"|"HUMIDITE"|"GAZ"|null, period="24h", limit=100) - Récupère les mesures
+2. get_latest_mesures() - Dernière mesure de chaque type
+3. get_mesures_stats(period="24h") - Statistiques (min, max, moyenne) par type
+4. check_mesures_alerts() - Vérifie les alertes sur les mesures actuelles
+5. get_temperature(period="24h", limit=50) - Mesures de température (°C)
+6. get_humidity(period="24h", limit=50) - Mesures d'humidité (%)
+7. get_gas_level(period="24h", limit=50) - Mesures de gaz (PPM)
+
+🔌 FONCTIONS APPAREILS:
+8. get_connected_devices(status="all"|"online"|"offline"|"suspicious", zone=null) - Liste les appareils
+9. get_device_details(device_id) - Détails d'un appareil
+10. get_network_traffic(device_id=null, period="24h") - Trafic réseau
+11. get_new_devices(since="24h") - Nouveaux appareils
+
+🚨 FONCTIONS ALERTES:
+12. get_security_alerts(severity="all"|"critical"|"warning"|"info", status="active", limit=20) - Alertes sécurité
+13. get_anomalies(type="all"|"network"|"physical"|"environmental", period="24h") - Anomalies
+14. explain_alert(alert_id) - Explication d'une alerte
+15. get_environmental_alerts(severity="all") - Alertes environnementales
+
+📈 FONCTIONS SYSTÈME:
+16. get_sensor_data(sensor_type="all"|"temperature"|"humidity"|"gas", node_id=null, period="24h") - Données capteurs
+17. get_node_status(node_id=null) - Statut des nœuds ESP32
+18. get_system_health() - État de santé du système
+19. get_security_report(period="24h", format="summary") - Rapport de sécurité
+20. get_compliance_status() - Conformité RGPD
+21. get_security_tips(topic="general"|"iot"|"network"|"physical"|"passwords") - Conseils sécurité
+22. navigate_to(page) - Navigation (dashboard, devices, alerts, sensors, nodes, settings, reports)
 
 ⚠️ RÈGLES IMPORTANTES:
 - N'appelle une fonction QUE si l'utilisateur demande des DONNÉES SPÉCIFIQUES du système
@@ -43,9 +56,10 @@ FONCTIONS:
   * Questions générales sur SafeLink ou la sécurité IoT
   * Demandes d'explications ou de conseils généraux
 - Appelle une fonction SEULEMENT pour:
-  * "Montre les appareils connectés" → get_connected_devices
-  * "Y a-t-il des alertes?" → get_security_alerts
-  * "Données de température" → get_sensor_data
+  * "Quelle est la température?" → get_temperature ou get_latest_mesures
+  * "Montre les mesures" → get_mesures
+  * "Y a-t-il des alertes?" → check_mesures_alerts ou get_security_alerts
+  * "Statistiques des capteurs" → get_mesures_stats
   * etc.
 - Réponds toujours en français
 """

@@ -159,21 +159,28 @@ class AnomalyDetector:
     def _check_thresholds(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Check critical thresholds - these always trigger regardless of ML"""
         temp = data.get("temperature", 25)
+        humidity = data.get("humidity", 50)
         gas = data.get("gas_level", 0)
         bytes_out = data.get("bytes_out", 0)
         connections = data.get("connection_count", 0)
         
-        # Temperature thresholds
+        # Temperature thresholds (CELSIUS)
         if temp > 60 or temp < 0:
-            return self._make_result(True, "TEMPERATURE_CRITICAL", "CRITICAL", {"temperature": temp}, data)
+            return self._make_result(True, "TEMPERATURE_CRITICAL", "CRITICAL", {"temperature": temp, "unite": "CELSIUS"}, data)
         if temp > 45 or temp < 5:
-            return self._make_result(True, "TEMPERATURE_WARNING", "HIGH", {"temperature": temp}, data)
+            return self._make_result(True, "TEMPERATURE_WARNING", "HIGH", {"temperature": temp, "unite": "CELSIUS"}, data)
         
-        # Gas leak thresholds
+        # Humidity thresholds (POURCENT)
+        if humidity > 90 or humidity < 10:
+            return self._make_result(True, "HUMIDITY_CRITICAL", "CRITICAL", {"humidity": humidity, "unite": "POURCENT"}, data)
+        if humidity > 80 or humidity < 20:
+            return self._make_result(True, "HUMIDITY_WARNING", "HIGH", {"humidity": humidity, "unite": "POURCENT"}, data)
+        
+        # Gas leak thresholds (PPM)
         if gas > 500:
-            return self._make_result(True, "GAS_LEAK_CRITICAL", "CRITICAL", {"gas_level": gas}, data)
+            return self._make_result(True, "GAS_LEAK_CRITICAL", "CRITICAL", {"gas_level": gas, "unite": "PPM"}, data)
         if gas > 100:
-            return self._make_result(True, "GAS_LEAK_WARNING", "HIGH", {"gas_level": gas}, data)
+            return self._make_result(True, "GAS_LEAK_WARNING", "HIGH", {"gas_level": gas, "unite": "PPM"}, data)
         
         # Network anomalies
         if bytes_out > 10_000_000:

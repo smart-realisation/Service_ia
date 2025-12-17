@@ -185,9 +185,9 @@ class TestAnalysisAPI:
         
         assert response.status_code == 200
         data = response.json()
-        assert "temperature" in data
-        assert "gas_level" in data
-        assert "bytes_out" in data
+        assert "TEMPERATURE" in data
+        assert "GAZ" in data
+        assert "HUMIDITE" in data
     
     def test_analyze_minimal_data(self):
         """POST /analyze avec données minimales"""

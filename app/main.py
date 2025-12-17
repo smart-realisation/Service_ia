@@ -17,6 +17,7 @@ from .endpoints.chatbot import router as chatbot_router, limiter
 from .endpoints.webhooks import router as webhooks_router
 from .endpoints.analysis import router as analysis_router
 from .endpoints.devices import router as devices_router
+from .endpoints.mesures import router as mesures_router
 
 # Configure logging
 logging.basicConfig(
@@ -91,6 +92,7 @@ app.include_router(chatbot_router)
 app.include_router(webhooks_router)
 app.include_router(analysis_router)
 app.include_router(devices_router)
+app.include_router(mesures_router)
 
 
 # Mount static files

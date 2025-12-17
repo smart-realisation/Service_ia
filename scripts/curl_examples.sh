@@ -15,6 +15,87 @@ echo -e "\n📍 Health Check"
 curl -s "$BASE_URL/api/v1/health" | jq .
 
 # ==========================================
+# MESURES (NOUVEAU SCHEMA)
+# ==========================================
+echo -e "\n\n📊 MESURES CAPTEURS"
+echo "----------------------------------------"
+
+echo -e "\n1. Types de mesure disponibles:"
+curl -s "$BASE_URL/api/v1/mesures/types" | jq .
+
+echo -e "\n2. Seuils d'alerte:"
+curl -s "$BASE_URL/api/v1/mesures/thresholds" | jq .
+
+echo -e "\n3. Créer mesure température (22.5°C):"
+curl -s -X POST "$BASE_URL/api/v1/mesures/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type_mesure_id": 1,
+    "valeur": 22.5
+  }' | jq .
+
+echo -e "\n4. Créer mesure humidité (55%):"
+curl -s -X POST "$BASE_URL/api/v1/mesures/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type_mesure_id": 2,
+    "valeur": 55.0
+  }' | jq .
+
+echo -e "\n5. Créer mesure gaz (25 PPM):"
+curl -s -X POST "$BASE_URL/api/v1/mesures/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type_mesure_id": 3,
+    "valeur": 25.0
+  }' | jq .
+
+echo -e "\n6. Dernières mesures:"
+curl -s "$BASE_URL/api/v1/mesures/latest" | jq .
+
+echo -e "\n7. Toutes les mesures (24h):"
+curl -s "$BASE_URL/api/v1/mesures/?period=24h&limit=10" | jq .
+
+echo -e "\n8. Mesures température uniquement:"
+curl -s "$BASE_URL/api/v1/mesures/?type_code=TEMPERATURE&period=24h" | jq .
+
+echo -e "\n9. Statistiques des mesures:"
+curl -s "$BASE_URL/api/v1/mesures/stats?period=24h" | jq .
+
+echo -e "\n10. Vérifier alertes:"
+curl -s "$BASE_URL/api/v1/mesures/alerts" | jq .
+
+# ==========================================
+# WEBHOOK MESURES (MQTT)
+# ==========================================
+echo -e "\n\n🔗 WEBHOOK MESURES"
+echo "----------------------------------------"
+
+echo -e "\n1. Envoyer mesure température via webhook:"
+curl -s -X POST "$BASE_URL/api/v1/webhooks/mqtt/mesure" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type_code": "TEMPERATURE",
+    "valeur": 23.5
+  }' | jq .
+
+echo -e "\n2. Envoyer mesure humidité via webhook:"
+curl -s -X POST "$BASE_URL/api/v1/webhooks/mqtt/mesure" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type_code": "HUMIDITE",
+    "valeur": 48.0
+  }' | jq .
+
+echo -e "\n3. Envoyer mesure gaz (alerte) via webhook:"
+curl -s -X POST "$BASE_URL/api/v1/webhooks/mqtt/mesure" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type_code": "GAZ",
+    "valeur": 150.0
+  }' | jq .
+
+# ==========================================
 # ANOMALY DETECTION
 # ==========================================
 echo -e "\n\n🔍 ANOMALY DETECTION"
@@ -45,7 +126,7 @@ curl -s -X POST "$BASE_URL/api/v1/analysis/analyze" \
     "gas_level": 5
   }' | jq .
 
-echo -e "\n3. Détection fuite de gaz (600 ppm):"
+echo -e "\n3. Détection fuite de gaz (600 PPM):"
 curl -s -X POST "$BASE_URL/api/v1/analysis/analyze" \
   -H "Content-Type: application/json" \
   -d '{
@@ -54,25 +135,17 @@ curl -s -X POST "$BASE_URL/api/v1/analysis/analyze" \
     "gas_level": 600
   }' | jq .
 
-echo -e "\n4. Détection exfiltration données (60MB):"
+echo -e "\n4. Détection humidité critique (95%):"
 curl -s -X POST "$BASE_URL/api/v1/analysis/analyze" \
   -H "Content-Type: application/json" \
   -d '{
     "device_id": "esp32-004",
     "temperature": 22,
-    "bytes_out": 60000000
+    "humidity": 95
   }' | jq .
 
-echo -e "\n5. Analyse batch:"
-curl -s -X POST "$BASE_URL/api/v1/analysis/analyze/batch" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "data": [
-      {"temperature": 22, "humidity": 50},
-      {"temperature": 55, "humidity": 50},
-      {"temperature": 22, "gas_level": 300}
-    ]
-  }' | jq .
+echo -e "\n5. Seuils de détection:"
+curl -s "$BASE_URL/api/v1/analysis/thresholds" | jq .
 
 # ==========================================
 # DEVICE CLASSIFICATION
@@ -80,16 +153,7 @@ curl -s -X POST "$BASE_URL/api/v1/analysis/analyze/batch" \
 echo -e "\n\n📱 DEVICE CLASSIFICATION"
 echo "----------------------------------------"
 
-echo -e "\n1. Classifier Raspberry Pi:"
-curl -s -X POST "$BASE_URL/api/v1/devices/classify" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "mac_address": "B8:27:EB:12:34:56",
-    "ip_address": "192.168.1.100",
-    "hostname": "raspberrypi"
-  }' | jq .
-
-echo -e "\n2. Classifier ESP32:"
+echo -e "\n1. Classifier ESP32:"
 curl -s -X POST "$BASE_URL/api/v1/devices/classify" \
   -H "Content-Type: application/json" \
   -d '{
@@ -97,33 +161,7 @@ curl -s -X POST "$BASE_URL/api/v1/devices/classify" \
     "hostname": "esp32-sensor"
   }' | jq .
 
-echo -e "\n3. Classifier appareil inconnu:"
-curl -s -X POST "$BASE_URL/api/v1/devices/classify" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "mac_address": "AA:BB:CC:DD:EE:FF"
-  }' | jq .
-
-echo -e "\n4. Classifier Amazon Echo:"
-curl -s -X POST "$BASE_URL/api/v1/devices/classify" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "mac_address": "68:A4:0E:11:22:33",
-    "hostname": "echo-dot"
-  }' | jq .
-
-echo -e "\n5. Classification batch:"
-curl -s -X POST "$BASE_URL/api/v1/devices/classify/batch" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "devices": [
-      {"mac_address": "B8:27:EB:11:11:11"},
-      {"mac_address": "24:0A:C4:22:22:22"},
-      {"mac_address": "AA:BB:CC:33:33:33", "hostname": "camera-front"}
-    ]
-  }' | jq .
-
-echo -e "\n6. Niveaux de risque:"
+echo -e "\n2. Niveaux de risque:"
 curl -s "$BASE_URL/api/v1/devices/risk-levels" | jq .
 
 # ==========================================
@@ -141,50 +179,35 @@ curl -s -X POST "$BASE_URL/api/v1/query" \
     "user_role": "HOME_USER"
   }' | jq .
 
-echo -e "\n2. Query devices:"
+echo -e "\n2. Query température:"
 curl -s -X POST "$BASE_URL/api/v1/query" \
   -H "Content-Type: application/json" \
   -d '{
-    "message": "Quels appareils sont connectés?",
+    "message": "Quelle est la température actuelle?",
     "user_id": "test-user",
-    "user_role": "IT_MANAGER"
+    "user_role": "HOME_USER"
   }' | jq .
 
-echo -e "\n3. Query alerts:"
+echo -e "\n3. Query mesures:"
 curl -s -X POST "$BASE_URL/api/v1/query" \
   -H "Content-Type: application/json" \
   -d '{
-    "message": "Y a-t-il des alertes de sécurité?",
+    "message": "Montre-moi les dernières mesures",
+    "user_id": "test-user",
+    "user_role": "HOME_USER"
+  }' | jq .
+
+echo -e "\n4. Query alertes:"
+curl -s -X POST "$BASE_URL/api/v1/query" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Y a-t-il des alertes sur les capteurs?",
     "user_id": "test-user",
     "user_role": "ADMIN"
   }' | jq .
 
-echo -e "\n4. Get suggestions:"
-curl -s "$BASE_URL/api/v1/suggestions?user_role=IT_MANAGER" | jq .
-
-# ==========================================
-# WEBHOOKS
-# ==========================================
-echo -e "\n\n🔗 WEBHOOKS"
-echo "----------------------------------------"
-
-echo -e "\n1. Device event:"
-curl -s -X POST "$BASE_URL/api/v1/webhooks/mqtt/device" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "topic": "safelink/devices/esp32-001",
-    "payload": {"device_id": "esp32-001", "status": "online"},
-    "timestamp": "2025-12-15T10:00:00Z"
-  }' | jq .
-
-echo -e "\n2. Alert event:"
-curl -s -X POST "$BASE_URL/api/v1/webhooks/mqtt/alert" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "topic": "safelink/alerts",
-    "payload": {"severity": "critical", "message": "Intrusion detected"},
-    "timestamp": "2025-12-15T10:00:00Z"
-  }' | jq .
+echo -e "\n5. Get suggestions:"
+curl -s "$BASE_URL/api/v1/suggestions?user_role=HOME_USER" | jq .
 
 echo -e "\n=========================================="
 echo "✅ Tests terminés!"

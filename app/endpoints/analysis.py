@@ -20,18 +20,18 @@ class SensorData(BaseModel):
     sensor_id: Optional[str] = None
     timestamp: Optional[str] = None
     
-    # Sensor readings
-    temperature: Optional[float] = Field(default=25.0, description="Temperature in Celsius")
-    humidity: Optional[float] = Field(default=50.0, description="Humidity percentage")
-    gas_level: Optional[float] = Field(default=0.0, description="Gas level in ppm")
-    motion: Optional[bool] = Field(default=False, description="Motion detected")
-    light_level: Optional[float] = Field(default=500.0, description="Light level in lux")
+    # Mesures capteurs (nouveau schéma)
+    temperature: Optional[float] = Field(default=25.0, description="Température en Celsius")
+    humidity: Optional[float] = Field(default=50.0, description="Humidité en pourcentage")
+    gas_level: Optional[float] = Field(default=0.0, description="Niveau de gaz en PPM")
+    motion: Optional[bool] = Field(default=False, description="Mouvement détecté")
+    light_level: Optional[float] = Field(default=500.0, description="Niveau de lumière en lux")
     
-    # Network metrics
-    bytes_in: Optional[int] = Field(default=0, description="Bytes received")
-    bytes_out: Optional[int] = Field(default=0, description="Bytes sent")
-    connection_count: Optional[int] = Field(default=0, description="Active connections")
-    unique_destinations: Optional[int] = Field(default=0, description="Unique destination IPs")
+    # Métriques réseau (optionnel)
+    bytes_in: Optional[int] = Field(default=0, description="Octets reçus")
+    bytes_out: Optional[int] = Field(default=0, description="Octets envoyés")
+    connection_count: Optional[int] = Field(default=0, description="Connexions actives")
+    unique_destinations: Optional[int] = Field(default=0, description="IPs destination uniques")
 
 
 class AnomalyResult(BaseModel):
@@ -131,9 +131,27 @@ async def train_model(request: Request, training: TrainingRequest):
 async def get_thresholds():
     """Get current anomaly detection thresholds"""
     return {
-        "temperature": {"min": 5, "max": 45, "critical_min": 0, "critical_max": 60},
-        "humidity": {"min": 20, "max": 80},
-        "gas_level": {"warning": 100, "critical": 500},
-        "bytes_out": {"warning": 10_000_000, "critical": 50_000_000},
-        "connection_count": {"warning": 100, "critical": 500}
+        "TEMPERATURE": {
+            "unite": "CELSIUS",
+            "warning_min": 5,
+            "warning_max": 45,
+            "critical_min": 0,
+            "critical_max": 60
+        },
+        "HUMIDITE": {
+            "unite": "POURCENT",
+            "warning_min": 20,
+            "warning_max": 80,
+            "critical_min": 10,
+            "critical_max": 90
+        },
+        "GAZ": {
+            "unite": "PPM",
+            "warning": 100,
+            "critical": 500
+        },
+        "network": {
+            "bytes_out": {"warning": 10_000_000, "critical": 50_000_000},
+            "connection_count": {"warning": 100, "critical": 500}
+        }
     }
